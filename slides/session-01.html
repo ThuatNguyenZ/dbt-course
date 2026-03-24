@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBT Course - Session 1: Introduction to DBT & Modern Data Stack</title>
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --light: #F7F9FC;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%);
+            --gradient-3: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #eee;
+            z-index: 999;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-1);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Slides Container */
+        .slides-container {
+            margin-top: 100px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Slide */
+        .slide {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .slide h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary);
+        }
+
+        /* Content Sections */
+        .objectives {
+            background: var(--gradient-3);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+        }
+
+        .objectives ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .objectives li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .objectives li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Architecture Diagram */
+        .architecture-diagram {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .arch-flow {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .arch-box {
+            background: white;
+            border: 3px solid;
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 150px;
+        }
+
+        .arch-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .arch-box.api { border-color: #FF6B6B; background: #FFF0F0; }
+        .arch-box.s3 { border-color: #FFB347; background: #FFF8F0; }
+        .arch-box.dbt { border-color: #4ECDC4; background: #F0FFFE; }
+        .arch-box.pg { border-color: #667eea; background: #F0F4FF; }
+        .arch-box.airflow { border-color: #FFE66D; background: #FFFEF0; }
+
+        .arch-arrow {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--dark);
+            color: #f8f8f2;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #FF79C6; }
+        .code-block .string { color: #F1FA8C; }
+        .code-block .comment { color: #6272A4; }
+        .code-block .function { color: #8BE9FD; }
+        .code-block .variable { color: #50FA7B; }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Quiz */
+        .quiz-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .quiz-question {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .quiz-option {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .quiz-option.selected {
+            background: rgba(255,255,255,0.3);
+            border-color: white;
+        }
+
+        .quiz-option.correct {
+            background: #4ECDC4;
+            border-color: #4ECDC4;
+        }
+
+        .quiz-option.incorrect {
+            background: #FF6B6B;
+            border-color: #FF6B6B;
+        }
+
+        .quiz-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        /* Navigation Buttons */
+        .slide-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nav-btn.secondary {
+            background: white;
+            color: var(--dark);
+            border: 2px solid var(--dark);
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background: var(--gradient-1);
+            color: white;
+            font-weight: bold;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: var(--light);
+        }
+
+        .comparison-table tr:hover {
+            background: #f0f0f0;
+        }
+
+        .comparison-table .check { color: #4ECDC4; font-size: 1.3rem; }
+        .comparison-table .cross { color: #FF6B6B; font-size: 1.3rem; }
+
+        /* Interactive Card */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border-left: 5px solid;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .info-card.red { border-color: #FF6B6B; }
+        .info-card.green { border-color: #4ECDC4; }
+        .info-card.blue { border-color: #667eea; }
+        .info-card.yellow { border-color: #FFE66D; }
+
+        .info-card h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .info-card .content {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .info-card.expanded .content {
+            display: block;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+            margin: 1.5rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--gradient-1);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .timeline-content {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            flex: 1;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, #FFE66D 0%, #FFB347 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 5px 20px rgba(255, 179, 71, 0.3);
+        }
+
+        .highlight-box h3 {
+            color: var(--dark);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem;
+            background: var(--dark);
+            color: white;
+            margin-top: 3rem;
+        }
+
+        .footer a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .slides-container {
+                margin-top: 140px;
+                padding: 1rem;
+            }
+
+            .slide {
+                padding: 1.5rem;
+            }
+
+            .slide h1 {
+                font-size: 1.8rem;
+            }
+
+            .arch-flow {
+                flex-direction: column;
+            }
+
+            .arch-arrow {
+                transform: rotate(90deg);
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-number {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Animation Keyframes */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+            bottom: calc(100% + 10px);
+        }
+
+        /* Session Overview */
+        .session-overview {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+        }
+
+        .session-overview h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .session-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .session-card {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .session-card:hover {
+            background: var(--gradient-1);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .session-card.active {
+            background: var(--gradient-1);
+            color: white;
+        }
+
+        .session-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            opacity: 0.3;
+        }
+
+        .session-card .title {
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-logo">🚀 DBT MasterClass</div>
+        <ul class="nav-links">
+            <li><a onclick="showSlide(0)">Giới thiệu</a></li>
+            <li><a onclick="showSlide(1)">DBT là gì?</a></li>
+            <li><a onclick="showSlide(2)">Tại sao DBT?</a></li>
+            <li><a onclick="showSlide(3)">Kiến trúc</a></li>
+            <li><a onclick="showSlide(4)">Setup</a></li>
+            <li><a onclick="showSlide(5)">Quiz</a></li>
+        </ul>
+    </nav>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Slides Container -->
+    <div class="slides-container">
+
+        <!-- Slide 0: Course Overview -->
+        <div class="slide active" id="slide0">
+            <h1>🎓 DBT MasterClass - Từ Glue đến DBT</h1>
+
+            <div class="objectives">
+                <h2>📋 Tổng quan khóa học (12 buổi)</h2>
+                <ul>
+                    <li><strong>Đối tượng:</strong> Data Engineers có background AWS (Glue, S3, EC2, RDS)</li>
+                    <li><strong>Mục tiêu:</strong> Thay thế AWS Glue bằng DBT Core + Airflow</li>
+                    <li><strong>Stack:</strong> S3 → DBT → PostgreSQL + Airflow orchestration</li>
+                    <li><strong>Thời lượng:</strong> 12 buổi × 2 giờ = 24 giờ</li>
+                </ul>
+            </div>
+
+            <div class="session-overview">
+                <h2>📅 Lộ trình 12 buổi</h2>
+                <div class="session-grid">
+                    <div class="session-card active" onclick="showSlide(0)">
+                        <div class="number">01</div>
+                        <div class="title">Giới thiệu DBT</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">02</div>
+                        <div class="title">DBT Core Setup</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">03</div>
+                        <div class="title">Models & Sources</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">04</div>
+                        <div class="title">Testing</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">05</div>
+                        <div class="title">Documentation</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">06</div>
+                        <div class="title">Macros</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">07</div>
+                        <div class="title">Packages</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">08</div>
+                        <div class="title">Incremental</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">09</div>
+                        <div class="title">Snapshots</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">10</div>
+                        <div class="title">Airflow Integration</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">11</div>
+                        <div class="title">Production Deploy</div>
+                    </div>
+                    <div class="session-card" onclick="alert('Coming soon!')">
+                        <div class="number">12</div>
+                        <div class="title">Near-real-time</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>💡 Sau khóa học này, bạn sẽ:</h3>
+                <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+                    <li>✓ Hiểu sâu về DBT và Modern Data Stack</li>
+                    <li>✓ Xây dựng data pipeline thay thế hoàn toàn AWS Glue</li>
+                    <li>✓ Deploy production-ready pipeline trên EC2</li>
+                    <li>✓ Orchestrate với Airflow + DBT</li>
+                    <li>✓ Tự chủ công nghệ, không phụ thuộc AWS managed services</li>
+                </ul>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn" disabled>← Trước</button>
+                <button class="nav-btn" onclick="showSlide(1)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 1: What is DBT -->
+        <div class="slide" id="slide1">
+            <h1>📚 DBT là gì?</h1>
+
+            <div class="card-grid">
+                <div class="info-card blue" onclick="toggleCard(this)">
+                    <h4>💬 Định nghĩa</h4>
+                    <p>DBT (Data Build Tool) là công cụ transformation-as-code cho data warehouse.</p>
+                    <div class="content">
+                        <p>DBT cho phép bạn viết SQL SELECT statements để transform dữ liệu, sau đó tự động hóa việc tạo tables/views trong data warehouse.</p>
+                    </div>
+                </div>
+                <div class="info-card green" onclick="toggleCard(this)">
+                    <h4>🔑 Core Concept</h4>
+                    <p>DBT follows TDD (Transform-Driven Development) cho data</p>
+                    <div class="content">
+                        <p>Mọi transformation đều được version control, test, và document như code.</p>
+                    </div>
+                </div>
+                <div class="info-card red" onclick="toggleCard(this)">
+                    <h4>⚡ DBT vs Glue</h4>
+                    <p>DBT tập trung vào transformation, không phải compute</p>
+                    <div class="content">
+                        <p>Glue = Spark-based ETL (compute + transform)<br>
+                        DBT = SQL-based transform (chỉ transform, dùng warehouse có sẵn)</p>
+                    </div>
+                </div>
+                <div class="info-card yellow" onclick="toggleCard(this)">
+                    <h4>🎯 Use Cases</h4>
+                    <p>Perfect cho analytics engineering</p>
+                    <div class="content">
+                        <p>✓ Data cleaning & deduplication<br>
+                        ✓ Business logic aggregation<br>
+                        ✓ Data modeling (star schema)<br>
+                        ✓ Data quality testing</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 2rem;">🔄 Vị trí của DBT trong Data Stack</h2>
+            <div class="architecture-diagram">
+                <div class="arch-flow">
+                    <div class="arch-box api" onclick="showDetail('api')">API Sources<br><small>Shopee/TikTok</small></div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-box s3" onclick="showDetail('s3')">S3 Raw<br><small>JSON/CSV</small></div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-box dbt" onclick="showDetail('dbt')">DBT Core<br><small>Transform</small></div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-box pg" onclick="showDetail('pg')">PostgreSQL<br><small>Analytics DB</small></div>
+                </div>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 2px dashed #ddd;">
+                    <div class="arch-box airflow" onclick="showDetail('airflow')" style="display: inline-block;">
+                        Airflow
+                        <br><small>Orchestration</small>
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
+                        ↖ Schedule & Dependency Management ↗
+                    </p>
+                </div>
+            </div>
+
+            <p id="detail-text" style="margin-top: 1rem; padding: 1rem; background: var(--light); border-radius: 10px; display: none;"></p>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(0)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(2)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 2: Why DBT -->
+        <div class="slide" id="slide2">
+            <h1>🎯 Tại sao DBT thay thế Glue?</h1>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>AWS Glue</th>
+                        <th>DBT Core</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Learning Curve</strong></td>
+                        <td>PySpark/Scala required</td>
+                        <td>SQL (ai cũng biết!)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Development Speed</strong></td>
+                        <td>Chậm (write code → test → debug)</td>
+                        <td>Nhanh (viết SQL → run → see results)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Testing</strong></td>
+                        <td>Manual (viết test code)</td>
+                        <td>Built-in (declarative tests)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Documentation</strong></td>
+                        <td>External (Confluence, README)</td>
+                        <td>Auto-generated từ YAML</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Version Control</strong></td>
+                        <td>Có (Git integration)</td>
+                        <td>Native (file-based)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cost</strong></td>
+                        <td>Pay per DPU-hour</td>
+                        <td>Free (open source)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vendor Lock-in</strong></td>
+                        <td>Cao (AWS ecosystem)</td>
+                        <td>Thấp (works everywhere)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Debugging</strong></td>
+                        <td>CloudWatch logs</td>
+                        <td>Local execution + clear errors</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box" style="background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%); box-shadow: 0 5px 20px rgba(78, 205, 196, 0.3);">
+                <h3>💰 Cost Comparison (Estimated)</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div style="background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 10px;">
+                        <h4>AWS Glue</h4>
+                        <p style="font-size: 1.5rem; color: #FF6B6B; font-weight: bold;">~$450/month</p>
+                        <small>3 hours/day × $0.44/DPU-hour × 30 days</small>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 10px;">
+                        <h4>DBT Core on EC2</h4>
+                        <p style="font-size: 1.5rem; color: #4ECDC4; font-weight: bold;">~$50/month</p>
+                        <small>EC2 t3.medium + electricity</small>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem; font-weight: bold;">💡 Tiết kiệm: ~88% chi phí!</p>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(1)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(3)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 3: Target Architecture -->
+        <div class="slide" id="slide3">
+            <h1>🏗️ Target Architecture</h1>
+
+            <div class="objectives">
+                <h2>Kiến trúc mục tiêu</h2>
+                <p>Thay thế hoàn toàn AWS Glue với DBT Core + Airflow</p>
+            </div>
+
+            <div class="architecture-diagram">
+                <h3 style="margin-bottom: 1rem;">📊 Data Flow</h3>
+                <div class="arch-flow">
+                    <div class="arch-box api">
+                        🛒 Shopee API<br>
+                        📱 TikTokShop API
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-box s3">
+                        📦 Python Pull Script<br>
+                        <small>S3 Raw (JSON)</small>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-box dbt">
+                        🔧 DBT Models<br>
+                        <small>Transform SQL</small>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-box pg">
+                        📊 PostgreSQL<br>
+                        <small>Analytics Tables</small>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; padding-top: 1rem; border-top: 2px dashed #ddd;">
+                    <div class="arch-box airflow" style="display: inline-block; min-width: 250px;">
+                        ⚡ Airflow DAG
+                        <br><small>Schedule + Dependencies</small>
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
+                        Orchestrates: API Pull → S3 Load → DBT Run → Notifications
+                    </p>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 2rem;">📁 DBT Project Structure</h2>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code>dbt-shopee-tiktok/
+├── models/
+│   ├── staging/           # Staging layer (raw → clean)
+│   │   ├── stg_shopee_orders.sql
+│   │   ├── stg_shopee_products.sql
+│   │   ├── stg_tiktok_orders.sql
+│   │   └── stg_tiktok_products.sql
+│   ├── intermediate/      # Intermediate layer (business logic)
+│   │   ├── int_orders__deduped.sql
+│   │   ├── int_orders__with_customer.sql
+│   │   └── int_revenue__daily.sql
+│   └── marts/            # Marts layer (final tables)
+│       ├── sales/
+│       │   ├── fct_daily_sales.sql
+│       │   └── fct_monthly_revenue.sql
+│       └── inventory/
+│           └── fct_stock_movement.sql
+├── seeds/                # Static data (CSV files)
+│   └── exchange_rates.csv
+├── tests/                # Custom tests
+│   └── assert_positive_revenue.sql
+├── macros/               # Reusable SQL
+│   ├── truncate_timestamp.sql
+│   └── calculate_vat.sql
+├── dbt_project.yml       # Project config
+├── profiles.yml          # DB connection (gitignore!)
+└── packages.yml          # External packages</code></pre>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(2)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(4)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 4: Setup Guide -->
+        <div class="slide" id="slide4">
+            <h1>🛠️ Setup Environment</h1>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-number">1</div>
+                    <div class="timeline-content">
+                        <h3>Yêu cầu hệ thống</h3>
+                        <ul style="margin-left: 1.5rem;">
+                            <li>Python 3.9+</li>
+                            <li>pip hoặc conda</li>
+                            <li>Truy cập S3 (AWS credentials)</li>
+                            <li>Truy cập PostgreSQL (RDS endpoint)</li>
+                            <li>EC2 instance (hoặc local machine để test)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-number">2</div>
+                    <div class="timeline-content">
+                        <h3>Cài đặt DBT Core</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># Tạo virtual environment (recommended)</span>
+python -m venv dbt-venv
+<span class="keyword">source</span> dbt-venv/bin/activate  <span class="comment"># Linux/Mac</span>
+<span class="comment"># hoặc</span>
+dbt-venv\Scripts\activate  <span class="comment"># Windows</span>
+
+<span class="comment"># Cài đặt DBT với PostgreSQL adapter</span>
+pip install dbt-postgresql
+
+<span class="comment"># Cài đặt thêm S3 plugin (nếu cần load từ S3)</span>
+pip install dbt-s3</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-number">3</div>
+                    <div class="timeline-content">
+                        <h3>Khởi tạo DBT Project</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># Tạo project mới</span>
+dbt init dbt-shopee-tiktok
+
+<span class="comment"># Chọn database adapter: postgresql</span>
+<span class="comment"># Nhập connection details:</span>
+<span class="comment">#   - host: your-rds-endpoint.rds.amazonaws.com</span>
+<span class="comment">#   - port: 5432</span>
+<span class="comment">#   - user: your_username</span>
+<span class="comment">#   - password: ******</span>
+<span class="comment">#   - database: analytics</span>
+<span class="comment">#   - schema: dbt_output</span></code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-number">4</div>
+                    <div class="timeline-content">
+                        <h3>Configure profiles.yml</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># ~/.dbt/profiles.yml</span>
+dbt-shopee-tiktok:
+  outputs:
+    dev:
+      type: postgres
+      host: your-rds-endpoint.rds.amazonaws.com
+      port: 5432
+      user: your_username
+      password: your_password
+      dbname: analytics
+      schema: dbt_output
+      threads: 4
+    prod:
+      type: postgres
+      host: your-rds-endpoint.rds.amazonaws.com
+      port: 5432
+      user: prod_user
+      password: prod_password
+      dbname: analytics
+      schema: analytics
+      threads: 8
+  target: dev</code></pre>
+                        </div>
+                        <p style="margin-top: 0.5rem; color: #FF6B6B;"><strong>⚠️ Lưu ý:</strong> profiles.yml KHÔNG được commit vào Git!</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-number">5</div>
+                    <div class="timeline-content">
+                        <h3>Test Connection</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># Test kết nối</span>
+dbt debug
+
+<span class="comment"># Chạy thử models</span>
+dbt run
+
+<span class="comment"># Chạy tests</span>
+dbt test
+
+<span class="comment"># Generate docs</span>
+dbt docs generate
+dbt docs serve</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(3)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(5)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 5: Quiz -->
+        <div class="slide" id="slide5">
+            <h1>🎮 Knowledge Check</h1>
+
+            <div class="quiz-container">
+                <div class="quiz-question">
+                    <strong>Câu 1:</strong> DBT khác AWS Glue ở điểm cốt lõi nào?
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this, false)">
+                        A. DBT đắt hơn Glue
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, true)">
+                        B. DBT là SQL-based transform, Glue là Spark-based ETL
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, false)">
+                        C. DBT chỉ chạy trên cloud, Glue chạy on-premise được
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, false)">
+                        D. DBT và Glue hoàn toàn giống nhau
+                    </div>
+                </div>
+                <div class="quiz-feedback" id="feedback1"></div>
+            </div>
+
+            <div class="quiz-container" style="margin-top: 1.5rem; background: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%);">
+                <div class="quiz-question">
+                    <strong>Câu 2:</strong> Component nào chịu trách nhiệm orchestration trong target architecture?
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this, false, 2)">
+                        A. DBT Core
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, false, 2)">
+                        B. S3
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, true, 2)">
+                        C. Airflow
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, false, 2)">
+                        D. PostgreSQL
+                    </div>
+                </div>
+                <div class="quiz-feedback" id="feedback2"></div>
+            </div>
+
+            <div class="quiz-container" style="margin-top: 1.5rem; background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);">
+                <div class="quiz-question">
+                    <strong>Câu 3:</strong> Thư mục nào trong DBT project chứa các file CSV static?
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this, false, 3)">
+                        A. models/
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, true, 3)">
+                        B. seeds/
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, false, 3)">
+                        C. macros/
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, false, 3)">
+                        D. tests/
+                    </div>
+                </div>
+                <div class="quiz-feedback" id="feedback3"></div>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 2rem;">
+                <h3>📝 Bài tập về nhà</h3>
+                <ol style="margin-left: 1.5rem; margin-top: 1rem;">
+                    <li>Cài đặt DBT Core trên local machine hoặc EC2</li>
+                    <li>Tạo project DBT mới kết nối với PostgreSQL RDS</li>
+                    <li>Chạy <code>dbt debug</code> để verify connection</li>
+                    <li>Chuẩn bị data sample từ Shopee/TikTok API cho buổi sau</li>
+                </ol>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(4)">← Trước</button>
+                <button class="nav-btn" disabled>Hoàn thành ✓</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>🚀 DBT MasterClass - Từ Glue đến DBT</p>
+        <p>Buổi 1/12 - Giới thiệu DBT & Modern Data Stack</p>
+        <p style="margin-top: 1rem;">
+            <a href="#">Download Materials</a> |
+            <a href="#">GitHub Repository</a> |
+            <a href="#">Contact Instructor</a>
+        </p>
+    </footer>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 6;
+
+        function showSlide(index) {
+            // Hide all slides
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+
+            // Show current slide
+            const slide = document.getElementById('slide' + index);
+            if (slide) {
+                slide.classList.add('active');
+                slide.classList.add('animate-in');
+            }
+
+            currentSlide = index;
+
+            // Update progress bar
+            const progress = ((index + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleCard(element) {
+            element.classList.toggle('expanded');
+        }
+
+        function showDetail(component) {
+            const details = {
+                'api': '🛒 <strong>API Sources:</strong> Shopee Open Platform API và TikTokShop API cung cấp data về orders, products, customers. Data được pull bằng Python script và lưu vào S3.',
+                's3': '📦 <strong>S3 Raw:</strong> Raw data lưu ở định dạng JSON (nguyên gốc từ API) và CSV (đã qua xử lý cơ bản). Tổ chức theo structure: s3://bucket/raw/source/date/',
+                'dbt': '🔧 <strong>DBT Core:</strong> Transform data từ raw → staging → intermediate → marts. Mỗi layer có mục đích riêng và được test đầy đủ.',
+                'pg': '📊 <strong>PostgreSQL:</strong> Analytics database phục vụ reporting và BI. DBT output các tables/views vào đây để consumer sử dụng.',
+                'airflow': '⚡ <strong>Airflow:</strong> Orchestration tool để schedule và manage dependencies giữa các tasks: API pull → S3 load → DBT run → notifications.'
+            };
+
+            const detailText = document.getElementById('detail-text');
+            detailText.innerHTML = details[component] || '';
+            detailText.style.display = 'block';
+            detailText.classList.add('animate-in');
+        }
+
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code);
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = 'Copy';
+            }, 2000);
+        }
+
+        function selectOption(element, isCorrect, quizNum = 1) {
+            // Remove selected class from siblings
+            const parent = element.parentElement;
+            parent.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            element.classList.add('selected');
+
+            // Show feedback
+            const feedback = document.getElementById('feedback' + quizNum);
+            feedback.classList.add('show');
+
+            if (isCorrect) {
+                element.classList.add('correct');
+                feedback.innerHTML = '<strong>🎉 Chính xác!</strong> ' + (quizNum === 1 ? 'DBT là SQL-based transform tool, trong khi Glue dùng Spark.' : quizNum === 2 ? 'Airflow manage workflow dependencies và schedule.' : 'Seeds chứa static CSV data như exchange rates, mappings.');
+                feedback.style.background = 'rgba(78, 205, 196, 0.5)';
+            } else {
+                element.classList.add('incorrect');
+                feedback.innerHTML = '<strong>😅 Chưa đúng.</strong> Hãy thử lại!';
+                feedback.style.background = 'rgba(255, 107, 107, 0.5)';
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            } else if (e.key === 'ArrowLeft' && currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBT Course - Session 4: Data Testing với DBT</title>
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --light: #F7F9FC;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%);
+            --gradient-3: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--primary); }
+
+        .progress-container {
+            position: fixed;
+            top: 70px;
+            left: 0; right: 0;
+            height: 4px;
+            background: #eee;
+            z-index: 999;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-1);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .slides-container {
+            margin-top: 100px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            border-left: 5px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .slide h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary);
+        }
+
+        .objectives {
+            background: var(--gradient-3);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+        }
+
+        .objectives ul {
+            list-style: none;
+        }
+
+        .objectives li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .objectives li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .code-block {
+            background: var(--dark);
+            color: #f8f8f2;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #FF79C6; }
+        .code-block .string { color: #F1FA8C; }
+        .code-block .comment { color: #6272A4; }
+        .code-block .function { color: #8BE9FD; }
+        .code-block .variable { color: #50FA7B; }
+        .code-block .number { color: #BD93F9; }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover { background: rgba(255,255,255,0.3); }
+
+        .info-box {
+            background: linear-gradient(135deg, #FFE66D 0%, #FFB347 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 5px 20px rgba(255, 179, 71, 0.3);
+        }
+
+        .info-box.warning {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .info-box.success {
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border-top: 5px solid;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .test-card.generic { border-color: #667eea; }
+        .test-card.specific { border-color: #4ECDC4; }
+        .test-card.custom { border-color: #FF6B6B; }
+
+        .test-card h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .test-card code {
+            background: var(--light);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .test-card .content {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .test-card.expanded .content {
+            display: block;
+        }
+
+        .pyramid {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+
+        .pyramid-level {
+            display: flex;
+            justify-content: center;
+            padding: 1rem 2rem;
+            margin: 0.2rem 0;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .pyramid-level.base {
+            width: 100%;
+            background: var(--gradient-3);
+        }
+
+        .pyramid-level.middle {
+            width: 70%;
+            background: var(--gradient-2);
+        }
+
+        .pyramid-level.top {
+            width: 40%;
+            background: var(--gradient-1);
+        }
+
+        .severity-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .severity-table th,
+        .severity-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .severity-table th {
+            background: var(--gradient-1);
+            color: white;
+            font-weight: bold;
+        }
+
+        .severity-table tr:hover {
+            background: var(--light);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-error { background: #ffe6e6; color: #FF6B6B; }
+        .badge-warn { background: #fff4e6; color: #FFB347; }
+
+        .quiz-container {
+            background: var(--gradient-1);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .quiz-question {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .quiz-option {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .quiz-option.correct {
+            background: #4ECDC4;
+            border-color: #4ECDC4;
+        }
+
+        .quiz-option.incorrect {
+            background: #FF6B6B;
+            border-color: #FF6B6B;
+        }
+
+        .quiz-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .slide-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.secondary {
+            background: white;
+            color: var(--dark);
+            border: 2px solid var(--dark);
+        }
+
+        @media (max-width: 768px) {
+            .nav { flex-direction: column; gap: 1rem; }
+            .nav-links { flex-wrap: wrap; justify-content: center; }
+            .slides-container { margin-top: 140px; padding: 1rem; }
+            .slide { padding: 1.5rem; }
+            .slide h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-logo">🚀 DBT MasterClass</div>
+        <ul class="nav-links">
+            <li><a onclick="showSlide(0)">Giới thiệu</a></li>
+            <li><a onclick="showSlide(1)">Built-in Tests</a></li>
+            <li><a onclick="showSlide(2)">Custom Tests</a></li>
+            <li><a onclick="showSlide(3)">Severity</a></li>
+            <li><a onclick="showSlide(4)">Exercise</a></li>
+        </ul>
+    </nav>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="slides-container">
+
+        <!-- Slide 0: Introduction -->
+        <div class="slide active" id="slide0">
+            <h1>🧪 Buổi 4: Data Testing với DBT</h1>
+
+            <div class="objectives">
+                <h2>📋 Mục tiêu buổi học</h2>
+                <ul>
+                    <li>Hiểu về testing pyramid trong data</li>
+                    <li>Sử dụng built-in tests (unique, not_null, foreign_key, accepted_values)</li>
+                    <li>Viết custom SQL tests</li>
+                    <li>Configure severity levels (warn vs error)</li>
+                    <li>Debug test failures</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>⏱️ Timeline (2 tiếng)</h3>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>20 phút: Testing concepts & pyramid</li>
+                    <li>40 phút: Built-in tests deep dive</li>
+                    <li>30 phút: Custom SQL tests</li>
+                    <li>20 phút: Severity levels & configuration</li>
+                    <li>10 phút: Q&A + Assignment</li>
+                </ul>
+            </div>
+
+            <h2 style="margin-top: 2rem;">📊 Testing Pyramid</h2>
+            <div class="pyramid">
+                <div class="pyramid-level top">Custom Tests (Business Logic)</div>
+                <div class="pyramid-level middle">Relationships & Accepted Values</div>
+                <div class="pyramid-level base">Unique & Not Null (Generic Tests)</div>
+            </div>
+
+            <div class="info-box success" style="margin-top: 1.5rem;">
+                <h3>💡 Tại sao testing quan trọng?</h3>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>✓ Catch data quality issues early</li>
+                    <li>✓ Prevent bad data from reaching stakeholders</li>
+                    <li>✓ Document data expectations</li>
+                    <li>✓ Build confidence in your pipeline</li>
+                </ul>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn" disabled>← Trước</button>
+                <button class="nav-btn" onclick="showSlide(1)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 1: Built-in Tests -->
+        <div class="slide" id="slide1">
+            <h1>🔧 DBT Built-in Tests</h1>
+
+            <h2>4 Generic Tests cơ bản</h2>
+            <div class="test-grid">
+                <div class="test-card generic" onclick="toggleCard(this)">
+                    <h4>🎯 unique</h4>
+                    <p>Kiểm tra column có giá trị duy nhất</p>
+                    <code>tests: - unique</code>
+                    <div class="content">
+                        <p><strong>Use case:</strong> Primary keys, order_id, customer_id</p>
+                        <div class="code-block" style="margin-top: 0.5rem;">
+<pre><code><span class="comment"># models/staging/schema.yml</span>
+models:
+  - name: stg_orders
+    columns:
+      - name: order_id
+        tests:
+          - unique</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="test-card generic" onclick="toggleCard(this)">
+                    <h4>📌 not_null</h4>
+                    <p>Kiểm tra column không có NULL</p>
+                    <code>tests: - not_null</code>
+                    <div class="content">
+                        <p><strong>Use case:</strong> Required fields, dates, amounts</p>
+                        <div class="code-block" style="margin-top: 0.5rem;">
+<pre><code>columns:
+  - name: order_id
+    tests:
+      - not_null
+  - name: order_date
+    tests:
+      - not_null</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="test-card specific" onclick="toggleCard(this)">
+                    <h4>🔗 relationships</h4>
+                    <p>Kiểm tra foreign key validity</p>
+                    <code>tests: - relationships</code>
+                    <div class="content">
+                        <p><strong>Use case:</strong> Foreign key references</p>
+                        <div class="code-block" style="margin-top: 0.5rem;">
+<pre><code>columns:
+  - name: customer_id
+    tests:
+      - relationships:
+          to: ref('stg_customers')
+          field: customer_id</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="test-card specific" onclick="toggleCard(this)">
+                    <h4>✅ accepted_values</h4>
+                    <p>Kiểm tra values trong tập cho phép</p>
+                    <code>tests: - accepted_values</code>
+                    <div class="content">
+                        <p><strong>Use case:</strong> Status, type, category columns</p>
+                        <div class="code-block" style="margin-top: 0.5rem;">
+<pre><code>columns:
+  - name: order_status
+    tests:
+      - accepted_values:
+          values: ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED']
+          quote_values: true</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box blue" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-top: 1.5rem;">
+                <h3>🎯 Best Practices</h3>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Add <code>unique</code> và <code>not_null</code> cho TẤT CẢ primary keys</li>
+                    <li>Test foreign keys với <code>relationships</code></li>
+                    <li>Define <code>accepted_values</code> cho status/type columns</li>
+                    <li>Click vào cards để xem examples chi tiết</li>
+                </ul>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(0)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(2)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 2: Custom Tests -->
+        <div class="slide" id="slide2">
+            <h1>🛠️ Custom SQL Tests</h1>
+
+            <h2>Khi nào cần custom tests?</h2>
+            <div class="info-box">
+                <p>Generic tests không cover được complex business logic. Ví dụ:</p>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Revenue không được âm</li>
+                    <li>Order date không được ở tương lai</li>
+                    <li>Discount không được vượt quá total</li>
+                    <li>Custom KPI thresholds</li>
+                </ul>
+            </div>
+
+            <h2 style="margin-top: 2rem;">Example: Positive Revenue Test</h2>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># tests/assert_positive_revenue.sql</span>
+<span class="comment">-- Returns failing rows (should return 0 rows)</span>
+
+<span class="keyword">select</span>
+    order_date,
+    total_revenue
+<span class="keyword">from</span> {{ ref('int_revenue__daily') }}
+<span class="keyword">where</span> total_revenue < <span class="number">0</span></code></pre>
+            </div>
+
+            <div class="info-box warning">
+                <h3>⚠️ Quy tắc quan trọng</h3>
+                <p style="margin-top: 0.5rem;">Custom test nên <strong>TRẢ VỀ ROWS LỖI</strong>. Nếu test pass → không có rows nào returned.</p>
+            </div>
+
+            <h2 style="margin-top: 2rem;">More Custom Test Examples</h2>
+
+            <h3>Test: Order Date Not In Future</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># tests/assert_order_date_not_future.sql</span>
+
+<span class="keyword">select</span>
+    order_id,
+    order_at
+<span class="keyword">from</span> {{ ref('int_orders__deduped') }}
+<span class="keyword">where</span> order_at > now()</code></pre>
+            </div>
+
+            <h3>Test: Discount Not Exceeding Total</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># tests/assert_discount_valid.sql</span>
+
+<span class="keyword">select</span>
+    order_id,
+    gross_amount,
+    discount
+<span class="keyword">from</span> {{ ref('int_orders__deduped') }}
+<span class="keyword">where</span> discount > gross_amount</code></pre>
+            </div>
+
+            <h3>Test: Daily Order Count Threshold</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># tests/assert_min_daily_orders.sql</span>
+
+<span class="keyword">select</span>
+    order_date,
+    order_count
+<span class="keyword">from</span> {{ ref('int_revenue__daily') }}
+<span class="keyword">where</span> order_count < <span class="number">0</span>
+  <span class="keyword">and</span> order_date >= date_trunc(<span class="string">'month'</span>, current_date)</code></pre>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(1)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(3)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 3: Severity Levels -->
+        <div class="slide" id="slide3">
+            <h1>⚙️ Severity Levels</h1>
+
+            <h2>Warn vs Error</h2>
+            <table class="severity-table">
+                <thead>
+                    <tr>
+                        <th>Severity</th>
+                        <th>Behavior</th>
+                        <th>Use Case</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-error">error</span></td>
+                        <td>Fails the dbt run</td>
+                        <td>Critical data quality issues</td>
+                        <td>Primary key violations</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-warn">warn</span></td>
+                        <td>Shows warning, continues</td>
+                        <td>Non-critical issues</td>
+                        <td>Missing optional data</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 style="margin-top: 2rem;">Configuring Severity</h2>
+
+            <h3>Inline Configuration</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># models/staging/schema.yml</span>
+models:
+  - name: stg_orders
+    columns:
+      - name: order_id
+        tests:
+          - unique:
+              severity: error
+          - not_null:
+              severity: error
+      - name: email
+        tests:
+          - not_null:
+              severity: warn  <span class="comment"># Optional field</span></code></pre>
+            </div>
+
+            <h3>Global Configuration</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># dbt_project.yml</span>
+tests:
+  dbt_shopee_tiktok:
+    +severity: warn  <span class="comment"># Default severity</span>
+
+    <span class="comment"># Override for specific tests</span>
+    critical:
+      +severity: error
+
+<span class="comment"># Or by model</span>
+models:
+  staging:
+    +tests:
+      +severity: error</code></pre>
+            </div>
+
+            <div class="info-box success">
+                <h3>🎯 Recommended Strategy</h3>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li><strong>error:</strong> unique, not_null cho primary keys</li>
+                    <li><strong>error:</strong> relationships cho foreign keys</li>
+                    <li><strong>warn:</strong> accepted_values (data có thể thay đổi)</li>
+                    <li><strong>warn:</strong> optional fields</li>
+                    <li><strong>warn:</strong> business logic thresholds</li>
+                </ul>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(2)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(4)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 4: Exercise -->
+        <div class="slide" id="slide4">
+            <h1>📝 Hands-on Exercise</h1>
+
+            <div class="objectives">
+                <h2>Bài tập thực hành</h2>
+                <p>Implement comprehensive testing cho pipeline</p>
+            </div>
+
+            <div class="info-box">
+                <h3>📋 Requirements</h3>
+                <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Add tests cho staging models:
+                        <ul>
+                            <li><code>unique</code> + <code>not_null</code> cho order_id, product_id</li>
+                            <li><code>accepted_values</code> cho order_status</li>
+                        </ul>
+                    </li>
+                    <li>Add tests cho intermediate models:
+                        <ul>
+                            <li><code>relationships</code> cho customer_id</li>
+                            <li><code>not_null</code> cho revenue columns</li>
+                        </ul>
+                    </li>
+                    <li>Viết 3+ custom tests:
+                        <ul>
+                            <li>Positive revenue</li>
+                            <li>Order date not in future</li>
+                            <li>Discount <= total amount</li>
+                        </ul>
+                    </li>
+                    <li>Configure severity levels phù hợp</li>
+                    <li>Run <code>dbt test</code> và fix failures</li>
+                </ol>
+            </div>
+
+            <h2 style="margin-top: 2rem;">Test Output Example</h2>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code>$ dbt test
+
+15:30:00  Running with 4 threads, debug mode
+15:30:01  Found 12 models, 20 tests
+
+15:30:05  1 of 20 START test unique_stg_orders_order_id ...... [RUN]
+15:30:06  1 of 20 PASS unique_stg_orders_order_id ............ [<span class="variable" style="color: #50FA7B;">PASS</span>]
+15:30:07  2 of 20 START test not_null_stg_orders_order_id .... [RUN]
+15:30:08  2 of 20 PASS not_null_stg_orders_order_id .......... [<span class="variable" style="color: #50FA7B;">PASS</span>]
+15:30:09  3 of 20 START test accepted_values_order_status .... [RUN]
+15:30:10  3 of 20 FAIL accepted_values_order_status .......... [<span class="variable" style="color: #FF6B6B;">FAIL (2)</span>]
+
+<span class="comment"># Failure details:</span>
+15:30:10
+ 订单 status 出现了 2 个 invalid values:
+  - 'INVALID_STATUS_1' (1 occurrence)
+  - 'PENDING_PAYMENT' (1 occurrence)</code></pre>
+            </div>
+
+            <div class="quiz-container" style="background: var(--gradient-3);">
+                <div class="quiz-question">
+                    <strong>Check your understanding:</strong> Khi test FAIL, điều gì xảy ra với pipeline?
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this, false)">
+                        A. dbt run luôn dừng lại, không chạy tiếp models
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, true)">
+                        B. Với severity=error: dbt test fails; Với severity=warn: pipeline continues
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, false)">
+                        C. dbt tự động fix data và chạy tiếp
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, false)">
+                        D. Không có gì xảy ra, test chỉ để logging
+                    </div>
+                </div>
+                <div class="quiz-feedback" id="feedback"></div>
+            </div>
+
+            <div class="info-box warning" style="margin-top: 1.5rem;">
+                <h3>📅 Deadline</h3>
+                <p>Hoàn thành exercise trước buổi 5. Submit screenshots của <code>dbt test</code> output.</p>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(3)">← Trước</button>
+                <button class="nav-btn" disabled>Hoàn thành ✓</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 5;
+
+        function showSlide(index) {
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+
+            const slide = document.getElementById('slide' + index);
+            if (slide) {
+                slide.classList.add('active');
+                slide.classList.add('animate-in');
+            }
+
+            currentSlide = index;
+            const progress = ((index + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleCard(element) {
+            element.classList.toggle('expanded');
+        }
+
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code);
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+        }
+
+        function selectOption(element, isCorrect) {
+            element.parentElement.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+            });
+
+            if (isCorrect) {
+                element.classList.add('correct');
+                document.getElementById('feedback').innerHTML = '<strong>🎉 Đúng!</strong> Severity=error sẽ fail cả dbt test run, trong khi severity=warn chỉ log warning và continue.';
+            } else {
+                element.classList.add('incorrect');
+                document.getElementById('feedback').innerHTML = '<strong>😅 Chưa chính xác.</strong> Severity level quyết định behavior khi test fails.';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) showSlide(currentSlide + 1);
+            else if (e.key === 'ArrowLeft' && currentSlide > 0) showSlide(currentSlide - 1);
+        });
+
+        showSlide(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+order_status_mapping,source_code,standard_status,description
+pending,SHOPEE_PENDING,PENDING,Order placed but not paid
+pending_payment,SHOPEE_PENDING_PAYMENT,PENDING,Payment processing
+paid,SHOPEE_PAID,PAID,Payment confirmed
+processing,SHOPEE_PROCESSING,PROCESSING,Seller preparing shipment
+shipped,SHOPEE_SHIPPED,SHIPPED,Package with carrier
+delivered,SHOPEE_DELIVERED,DELIVERED,Customer received order
+cancelled,SHOPEE_CANCELLED,CANCELLED,Order cancelled
+returned,SHOPEE_RETURNED,RETURNED,Item returned by customer
+pending,TT_PENDING,PENDING,Order placed but not paid
+paid,TT_PAID,PAID,Payment confirmed
+processing,TT_PROCESSING,PROCESSING,Order being prepared
+shipped,TT_SHIPPED,SHIPPED,Package shipped
+delivered,TT_DELIVERED,DELIVERED,Order completed
+cancelled,TT_CANCELLED,CANCELLED,Order cancelled
+returned,TT_RETURNED,RETURNED,Item returned

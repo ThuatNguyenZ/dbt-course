@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBT Course - Session 7-8: Packages & Incremental Models</title>
+    <style>
+        :root {
+            --primary: #FF6B6B; --secondary: #4ECDC4; --accent: #FFE66D;
+            --dark: #2C3E50; --light: #F7F9FC;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%);
+            --gradient-3: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); color: var(--dark); line-height: 1.6; }
+        .nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); box-shadow: 0 2px 20px rgba(0,0,0,0.1); z-index: 1000; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { font-size: 1.5rem; font-weight: bold; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--dark); font-weight: 500; cursor: pointer; }
+        .nav-links a:hover { color: var(--primary); }
+        .progress-container { position: fixed; top: 70px; left: 0; right: 0; height: 4px; background: #eee; z-index: 999; }
+        .progress-bar { height: 100%; background: var(--gradient-1); width: 0%; transition: width 0.3s; }
+        .slides-container { margin-top: 100px; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+        .slide { background: white; border-radius: 20px; padding: 3rem; margin-bottom: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.1); display: none; }
+        .slide.active { display: block; animation: fadeIn 0.6s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .slide h1 { font-size: 2.5rem; margin-bottom: 1.5rem; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .slide h2 { font-size: 1.8rem; margin-bottom: 1rem; color: var(--dark); border-left: 5px solid var(--primary); padding-left: 1rem; }
+        .slide h3 { font-size: 1.3rem; margin-bottom: 0.8rem; color: var(--primary); }
+        .objectives { background: var(--gradient-3); color: white; padding: 2rem; border-radius: 15px; margin: 1.5rem 0; }
+        .objectives ul { list-style: none; }
+        .objectives li { padding: 0.5rem 0; padding-left: 2rem; position: relative; }
+        .objectives li::before { content: '✓'; position: absolute; left: 0; font-weight: bold; }
+        .code-block { background: var(--dark); color: #f8f8f2; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; overflow-x: auto; position: relative; }
+        .code-block pre { margin: 0; white-space: pre-wrap; font-family: 'Fira Code', monospace; font-size: 0.9rem; line-height: 1.5; }
+        .code-block .keyword { color: #FF79C6; }
+        .code-block .string { color: #F1FA8C; }
+        .code-block .comment { color: #6272A4; }
+        .code-block .function { color: #8BE9FD; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; }
+        .copy-btn:hover { background: rgba(255,255,255,0.3); }
+        .info-box { background: linear-gradient(135deg, #FFE66D 0%, #FFB347 100%); border-radius: 15px; padding: 1.5rem; margin: 1.5rem 0; }
+        .info-box.success { background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%); }
+        .info-box.warning { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%); }
+        .comparison-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .comparison-table th, .comparison-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #eee; }
+        .comparison-table th { background: var(--gradient-1); color: white; }
+        .comparison-table tr:hover { background: var(--light); }
+        .quiz-container { background: var(--gradient-1); color: white; border-radius: 15px; padding: 2rem; margin: 1.5rem 0; }
+        .quiz-question { font-size: 1.2rem; margin-bottom: 1.5rem; }
+        .quiz-options { display: flex; flex-direction: column; gap: 1rem; }
+        .quiz-option { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); border-radius: 10px; padding: 1rem 1.5rem; cursor: pointer; }
+        .quiz-option:hover { background: rgba(255,255,255,0.2); }
+        .quiz-option.correct { background: #4ECDC4; border-color: #4ECDC4; }
+        .quiz-option.incorrect { background: #FF6B6B; border-color: #FF6B6B; }
+        .quiz-feedback { margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none; background: rgba(255,255,255,0.2); }
+        .slide-nav { display: flex; justify-content: space-between; margin-top: 2rem; gap: 1rem; }
+        .nav-btn { background: var(--gradient-1); color: white; border: none; padding: 1rem 2rem; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102,126,234,0.4); }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .nav-btn.secondary { background: white; color: var(--dark); border: 2px solid var(--dark); }
+        .check { color: #4ECDC4; font-size: 1.3rem; }
+        .cross { color: #FF6B6B; font-size: 1.3rem; }
+        @media (max-width: 768px) { .nav { flex-direction: column; gap: 1rem; } .slides-container { margin-top: 140px; padding: 1rem; } .slide { padding: 1.5rem; } }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-logo">🚀 DBT MasterClass</div>
+        <ul class="nav-links">
+            <li><a onclick="showSlide(0)">Giới thiệu</a></li>
+            <li><a onclick="showSlide(1)">Packages</a></li>
+            <li><a onclick="showSlide(2)">dbt_utils</a></li>
+            <li><a onclick="showSlide(3)">Incremental</a></li>
+            <li><a onclick="showSlide(4)">Exercise</a></li>
+        </ul>
+    </nav>
+    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="slides-container">
+
+        <!-- Slide 0 -->
+        <div class="slide active" id="slide0">
+            <h1>📦 Buổi 7-8: DBT Packages & Incremental Models</h1>
+            <div class="objectives">
+                <h2>Mục tiêu</h2>
+                <ul>
+                    <li>Hiểu và sử dụng DBT packages</li>
+                    <li>Install và dùng dbt_utils, dbt_date</li>
+                    <li>Implement incremental models</li>
+                    <li>Optimize performance với incremental strategies</li>
+                </ul>
+            </div>
+            <div class="info-box">
+                <h3>Timeline</h3>
+                <ul style="margin-left:1.5rem"><li>40 phút: DBT Packages</li><li>40 phút: Incremental Models</li><li>30 phút: Hands-on</li><li>10 phút: Q&A</li></ul>
+            </div>
+            <h2>DBT Packages Ecosystem</h2>
+            <p>Packages cho phép reuse code từ community hoặc share trong team.</p>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># packages.yml</span>
+packages:
+  - package: dbt-labs/dbt_utils
+    version: 1.1.1
+  - package: dbt-labs/codegen
+    version: 0.9.0
+  - package: calogica/dbt_date
+    version: 0.7.0
+  - package: dbt-labs/dbt_project_evaluator
+    version: 0.8.0</code></pre>
+            </div>
+            <div class="slide-nav">
+                <button class="nav-btn" disabled>← Trước</button>
+                <button class="nav-btn" onclick="showSlide(1)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 1 -->
+        <div class="slide" id="slide1">
+            <h1>📚 Installing Packages</h1>
+            <h2>Commands</h2>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># Install packages</span>
+dbt deps
+
+<span class="comment"># Update packages</span>
+dbt deps --upgrade
+
+<span class="comment"># Clean packages</span>
+dbt clean</code></pre>
+            </div>
+            <h2>Popular Packages</h2>
+            <table class="comparison-table">
+                <tr><th>Package</th><th>Purpose</th><th>Key Macros</th></tr>
+                <tr><td>dbt_utils</td><td>Utility functions</td><td>surrogate_key, date_spine, pivot</td></tr>
+                <tr><td>dbt_date</td><td>Date functions</td><td>get_date_dimension, date_part</td></tr>
+                <tr><td>codegen</td><td>Code generation</td><td>generate_base_model, generate_model_yaml</td></tr>
+                <tr><td>audit_helper</td><td>Data auditing</td><td>compare_column_values, summarize</td></tr>
+            </table>
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(0)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(2)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide" id="slide2">
+            <h1>🛠️ Using dbt_utils</h1>
+            <h2>Common Functions</h2>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># 1. Surrogate Key</span>
+select
+    {{ dbt_utils.surrogate_key(['order_id', 'product_id']) }} as order_product_id
+from {{ ref('stg_orders') }}
+
+<span class="comment"># 2. Date Spine (generate date range)</span>
+{{ dbt_utils.date_spine(
+    datepart="day",
+    start_date="cast('2024-01-01' as date)",
+    end_date="cast('2024-12-31' as date)"
+) }}
+
+<span class="comment"># 3. Pivot</span>
+{{ dbt_utils.pivot(
+    column='status',
+    values=['PENDING', 'PAID', 'SHIPPED'],
+    cmp='sum',
+    prefix='revenue_'
+) }}
+
+<span class="comment"># 4. Not Empty String</span>
+where {{ dbt_utils.not_empty_string('customer_name') }}</code></pre>
+            </div>
+            <div class="info-box success">
+                <h3>Pro Tip</h3>
+                <p>Use <code>dbt_project_evaluator</code> để audit và optimize DBT project tự động!</p>
+            </div>
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(1)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(3)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide" id="slide3">
+            <h1>⚡ Incremental Models</h1>
+            <h2>Full Refresh vs Incremental</h2>
+            <table class="comparison-table">
+                <tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+                <tr><td>Full Refresh</td><td><span class="check">✓</span> Simple</td><td><span class="cross">✗</span> Slow, expensive</td></tr>
+                <tr><td>Incremental</td><td><span class="check">✓</span> Fast, cost-effective</td><td><span class="cross">✗</span> More complex</td></tr>
+            </table>
+            <h2>Incremental Model Pattern</h2>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># models/marts/fct_daily_sales.sql</span>
+{{
+    config(
+        materialized='incremental',
+        unique_key='order_date',
+        incremental_strategy='merge',
+    )
+}}
+
+with orders as (
+    select * from {{ ref('int_orders__enriched') }}
+    {% if is_incremental() %}
+        -- Only get new/updated data
+        where order_at >= (select max(order_date) - interval '7 days' from {{ this }})
+    {% endif %}
+)
+
+select
+    date_trunc('day', order_at)::date as order_date,
+    count(*) as order_count,
+    sum(gross_amount) as revenue
+from orders
+group by 1</code></pre>
+            </div>
+            <div class="info-box">
+                <h3>Incremental Strategies</h3>
+                <ul style="margin-left:1.5rem">
+                    <li><strong>append:</strong> Only new rows (logs, events)</li>
+                    <li><strong>delete+insert:</strong> Replace overlapping data</li>
+                    <li><strong>merge:</strong> Update existing + insert new (default for PG)</li>
+                    <li><strong>insert_overwrite:</strong> Partition overwrite (BigQuery)</li>
+                </ul>
+            </div>
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(2)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(4)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide" id="slide4">
+            <h1>📝 Exercise</h1>
+            <div class="objectives">
+                <h2>Bài tập</h2>
+                <ol style="margin-left:1.5rem">
+                    <li>Install dbt_utils package</li>
+                    <li>Refactor code dùng <code>surrogate_key</code>, <code>date_spine</code></li>
+                    <li>Convert fct_daily_sales sang incremental</li>
+                    <li>Test với <code>dbt run --full-refresh</code></li>
+                </ol>
+            </div>
+            <div class="quiz-container">
+                <div class="quiz-question">Khi nào dùng incremental thay vì full refresh?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this,false)">A. Luôn dùng incremental</div>
+                    <div class="quiz-option" onclick="selectOption(this,true)">B. Khi dataset lớn và chỉ có data mới thay đổi</div>
+                    <div class="quiz-option" onclick="selectOption(this,false)">C. Khi dataset nhỏ</div>
+                    <div class="quiz-option" onclick="selectOption(this,false)">D. Không bao giờ dùng incremental</div>
+                </div>
+                <div class="quiz-feedback" id="feedback"></div>
+            </div>
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(3)">← Trước</button>
+                <button class="nav-btn" disabled>Hoàn thành ✓</button>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 5;
+        function showSlide(i) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.getElementById('slide'+i).classList.add('active');
+            currentSlide = i;
+            document.getElementById('progressBar').style.width = ((i+1)/totalSlides*100) + '%';
+        }
+        function copyCode(btn) {
+            navigator.clipboard.writeText(btn.nextElementSibling.innerText);
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+        function selectOption(el, correct) {
+            el.parentElement.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('correct','incorrect'));
+            el.classList.add(correct ? 'correct' : 'incorrect');
+            document.getElementById('feedback').innerHTML = correct ? '<strong>✓ Đúng!</strong> Incremental models chỉ process data mới/thay đổi, giúp tiết kiệm thời gian và chi phí.' : '<strong>✗ Sai.</strong> Incremental chỉ hiệu quả khi dataset lớn và có data mới liên tục.';
+        }
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' && currentSlide < totalSlides-1) showSlide(currentSlide+1);
+            if (e.key === 'ArrowLeft' && currentSlide > 0) showSlide(currentSlide-1);
+        });
+        showSlide(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBT MasterClass - Course Index</title>
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --light: #F7F9FC;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%);
+            --gradient-3: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: var(--gradient-1);
+            color: white;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Session Cards */
+        .sessions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .session-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .session-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        .session-header {
+            padding: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .session-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(45deg);
+        }
+
+        .session-header.s1 { background: var(--gradient-1); }
+        .session-header.s2 { background: var(--gradient-3); }
+        .session-header.s3 { background: var(--gradient-2); }
+        .session-header.s4 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .session-header.s5 { background: linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%); }
+        .session-header.s6 { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); }
+        .session-header.s7 { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
+        .session-header.s8 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .session-header.s9 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .session-header.s10 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .session-header.s11 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .session-header.s12 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+
+        .session-number {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .session-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .session-body {
+            padding: 1.5rem;
+        }
+
+        .session-topics {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .session-topics li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .session-topics li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        .session-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-theory { background: #ffe6e6; color: #FF6B6B; }
+        .badge-hands-on { background: #e6fff9; color: #4ECDC4; }
+        .badge-exercise { background: #fff4e6; color: #FFB347; }
+
+        /* Part Sections */
+        .part-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.08);
+        }
+
+        .part-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .part-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .part-title h3 {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .part-title p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Resources Section */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .resource-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+
+        .resource-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .resource-card h4 {
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .resource-card a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .resource-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            background: var(--gradient-1);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .progress-section h3 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .progress-bar-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            background: white;
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { gap: 1rem; }
+            .sessions-grid { grid-template-columns: 1fr; }
+            .part-header { flex-direction: column; text-align: center; }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>🚀 DBT MasterClass</h1>
+        <p>Từ AWS Glue đến DBT Core - Xây dựng Modern Data Pipeline với S3, PostgreSQL và Airflow</p>
+
+        <div class="hero-stats">
+            <div class="stat-card">
+                <span class="stat-number">12</span>
+                <span class="stat-label">Buổi học</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">24h</span>
+                <span class="stat-label">Thời lượng</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">30+</span>
+                <span class="stat-label">Bài tập</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">1</span>
+                <span class="stat-label">Final Project</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <h3>📊 Progress Tracking</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="courseProgress" style="width: 0%"></div>
+            </div>
+            <p class="progress-text"><span id="completedCount">0</span>/12 sessions completed</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+                <button onclick="markComplete(0)" style="padding: 0.5rem 1rem; border: none; border-radius: 5px; cursor: pointer; background: rgba(255,255,255,0.3); color: white;">Mark Session 1 Complete</button>
+            </div>
+        </div>
+
+        <!-- Part 1 -->
+        <div class="part-section">
+            <div class="part-header">
+                <div class="part-number">1</div>
+                <div class="part-title">
+                    <h3>DBT Core Fundamentals</h3>
+                    <p>Buổi 1-6: Nền tảng DBT Core và data modeling</p>
+                </div>
+            </div>
+
+            <div class="sessions-grid">
+                <!-- Session 1 -->
+                <a href="slides/session-01.html" class="session-card animate-in" style="animation-delay: 0.1s;">
+                    <div class="session-header s1">
+                        <div class="session-number">Buổi 01</div>
+                        <div class="session-title">Giới thiệu DBT & Modern Data Stack</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>DBT là gì? Tại sao DBT?</li>
+                            <li>So sánh DBT vs AWS Glue</li>
+                            <li>Target architecture: S3 → DBT → PostgreSQL</li>
+                            <li>Setup environment và test connection</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Session 2 -->
+                <a href="slides/session-02.html" class="session-card animate-in" style="animation-delay: 0.2s;">
+                    <div class="session-header s2">
+                        <div class="session-number">Buổi 02</div>
+                        <div class="session-title">DBT Core Setup & First Models</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>DBT project structure</li>
+                            <li>Data layers: Raw → Staging → Marts</li>
+                            <li>Tạo first staging models</li>
+                            <li>Sources configuration</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                            <span class="session-badge badge-exercise">📝 Exercise</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Session 3 -->
+                <a href="#" class="session-card animate-in" style="animation-delay: 0.3s;">
+                    <div class="session-header s3">
+                        <div class="session-number">Buổi 03</div>
+                        <div class="session-title">Intermediate Models & Business Logic</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>Intermediate layer purpose</li>
+                            <li>Joins và data deduplication</li>
+                            <li>Business logic implementation</li>
+                            <li>Revenue aggregation</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Session 4 -->
+                <a href="#" class="session-card animate-in" style="animation-delay: 0.4s;">
+                    <div class="session-header s1">
+                        <div class="session-number">Buổi 04</div>
+                        <div class="session-title">Data Testing với DBT</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>Built-in tests (unique, not_null, etc.)</li>
+                            <li>Custom SQL tests</li>
+                            <li>Testing best practices</li>
+                            <li>Debug test failures</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Session 5 -->
+                <a href="#" class="session-card animate-in" style="animation-delay: 0.5s;">
+                    <div class="session-header s2">
+                        <div class="session-number">Buổi 05</div>
+                        <div class="session-title">Documentation & Data Discovery</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>Auto-generated documentation</li>
+                            <li>Writing YAML descriptions</li>
+                            <li>dbt docs generate & serve</li>
+                            <li>Hosting docs on S3</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Session 6 -->
+                <a href="#" class="session-card animate-in" style="animation-delay: 0.6s;">
+                    <div class="session-header s3">
+                        <div class="session-number">Buổi 06</div>
+                        <div class="session-title">Macros - Reusable SQL</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>Macro syntax và structure</li>
+                            <li>Jinja templating basics</li>
+                            <li>Common macro patterns</li>
+                            <li>Debugging macros</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Part 2 -->
+        <div class="part-section">
+            <div class="part-header">
+                <div class="part-number">2</div>
+                <div class="part-title">
+                    <h3>Advanced DBT</h3>
+                    <p>Buổi 7-9: Advanced patterns và optimization</p>
+                </div>
+            </div>
+
+            <div class="sessions-grid">
+                <!-- Session 7 -->
+                <a href="#" class="session-card animate-in">
+                    <div class="session-header s7">
+                        <div class="session-number">Buổi 07</div>
+                        <div class="session-title">DBT Packages & Code Reuse</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>DBT packages ecosystem</li>
+                            <li>Installing dbt_utils, dbt_date</li>
+                            <li>Using package functions</li>
+                            <li>Creating custom packages</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Session 8 -->
+                <a href="#" class="session-card animate-in">
+                    <div class="session-header s8">
+                        <div class="session-number">Buổi 08</div>
+                        <div class="session-title">Incremental Models & Performance</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>Incremental vs full-refresh</li>
+                            <li>Incremental strategies</li>
+                            <li>Configuring incremental models</li>
+                            <li>Performance optimization</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Session 9 -->
+                <a href="#" class="session-card animate-in">
+                    <div class="session-header s9">
+                        <div class="session-number">Buổi 09</div>
+                        <div class="session-title">Snapshots & SCD Data</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>What are snapshots?</li>
+                            <li>SCD Type 1 vs Type 2</li>
+                            <li>Snapshot configuration</li>
+                            <li>Tracking historical changes</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Part 3 -->
+        <div class="part-section">
+            <div class="part-header">
+                <div class="part-number">3</div>
+                <div class="part-title">
+                    <h3>Production Deployment</h3>
+                    <p>Buổi 10-12: Deploy, orchestrate và scale</p>
+                </div>
+            </div>
+
+            <div class="sessions-grid">
+                <!-- Session 10 -->
+                <a href="#" class="session-card animate-in">
+                    <div class="session-header s10">
+                        <div class="session-number">Buổi 10</div>
+                        <div class="session-title">Airflow Integration</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>Airflow architecture overview</li>
+                            <li>DBT Operator configuration</li>
+                            <li>Creating DBT DAGs</li>
+                            <li>Dependencies và alerts</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Session 11 -->
+                <a href="#" class="session-card animate-in">
+                    <div class="session-header s11">
+                        <div class="session-number">Buổi 11</div>
+                        <div class="session-title">Production Deployment trên EC2</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>EC2 setup và security</li>
+                            <li>Docker containerization</li>
+                            <li>CI/CD với GitHub Actions</li>
+                            <li>Monitoring và logging</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-hands-on">💻 Hands-on</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Session 12 -->
+                <a href="#" class="session-card animate-in">
+                    <div class="session-header s12">
+                        <div class="session-number">Buổi 12</div>
+                        <div class="session-title">Near-Real-Time Architecture</div>
+                    </div>
+                    <div class="session-body">
+                        <ul class="session-topics">
+                            <li>Batch vs streaming</li>
+                            <li>Designing for near-real-time</li>
+                            <li>Cost-performance tradeoffs</li>
+                            <li>Final project presentations</li>
+                        </ul>
+                        <div>
+                            <span class="session-badge badge-theory">📖 Lý thuyết</span>
+                            <span class="session-badge badge-exercise">🎓 Final Project</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Resources Section -->
+        <div class="part-section">
+            <div class="part-header">
+                <div class="part-number">📚</div>
+                <div class="part-title">
+                    <h3>Tài nguyên học tập</h3>
+                    <p>Documents, sample code, và external resources</p>
+                </div>
+            </div>
+
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <div class="resource-icon">📖</div>
+                    <h4>Course Syllabus</h4>
+                    <p>Detailed curriculum và learning outcomes</p>
+                    <a href="COURSE_SYLLABUS.md">View Document →</a>
+                </div>
+
+                <div class="resource-card">
+                    <div class="resource-icon">📝</div>
+                    <h4>Exercises & Solutions</h4>
+                    <p>Hands-on exercises với sample solutions</p>
+                    <a href="exercises/EXERCISES.md">View Exercises →</a>
+                </div>
+
+                <div class="resource-card">
+                    <div class="resource-icon">🔗</div>
+                    <h4>DBT Documentation</h4>
+                    <p>Official DBT docs và guides</p>
+                    <a href="https://docs.getdbt.com/" target="_blank">docs.getdbt.com →</a>
+                </div>
+
+                <div class="resource-card">
+                    <div class="resource-icon">💻</div>
+                    <h4>GitHub Repository</h4>
+                    <p>Sample code và project templates</p>
+                    <a href="#">Coming Soon →</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>🚀 DBT MasterClass - Từ Glue đến DBT</p>
+        <p>12 buổi học • 24 giờ • 30+ bài tập</p>
+        <p style="margin-top: 1rem;">
+            <a href="#">Contact Instructor</a> |
+            <a href="#">Slack Channel</a> |
+            <a href="#">GitHub Repository</a>
+        </p>
+    </footer>
+
+    <script>
+        // Simple progress tracking (localStorage)
+        const STORAGE_KEY = 'dbt_course_progress';
+
+        function getProgress() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function markComplete(sessionIndex) {
+            const progress = getProgress();
+            if (!progress.includes(sessionIndex)) {
+                progress.push(sessionIndex);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+                updateProgressUI();
+            }
+        }
+
+        function updateProgressUI() {
+            const progress = getProgress();
+            const percentage = (progress.length / 12) * 100;
+            document.getElementById('courseProgress').style.width = percentage + '%';
+            document.getElementById('completedCount').textContent = progress.length;
+        }
+
+        // Initialize
+        updateProgressUI();
+
+        // Animate cards on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        });
+
+        document.querySelectorAll('.animate-in').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

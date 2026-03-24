@@ -1,0 +1,91 @@
+# DBT Project Configuration
+# File: dbt_project.yml
+
+name: 'dbt_shopee_tiktok'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'dbt-shopee-tiktok'
+
+# These configurations specify where dbt should look for different types of files.
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# Target configuration
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Require explicit materialization for better control
+require-dbt-version: [">=1.6.0", "<2.0.0"]
+
+# Model configurations
+models:
+  dbt_shopee_tiktok:
+    # Staging layer: Views for fresh data
+    staging:
+      +materialized: view
+      +schema: staging
+      +tags: ['staging']
+
+    # Intermediate layer: Tables for complex transformations
+    intermediate:
+      +materialized: table
+      +schema: intermediate
+      +tags: ['intermediate']
+
+    # Marts layer: Tables optimized for querying
+    marts:
+      +materialized: table
+      +schema: marts
+      +tags: ['marts']
+
+      # Sales marts
+      sales:
+        +schema: sales
+        +tags: ['sales']
+
+      # Inventory marts
+      inventory:
+        +schema: inventory
+        +tags: ['inventory']
+
+# Seed configurations
+seeds:
+  dbt_shopee_tiktok:
+    +schema: reference_data
+    exchange_rates:
+      +schema: reference_data
+    product_mappings:
+      +schema: reference_data
+
+# Test configurations
+tests:
+  dbt_shopee_tiktok:
+    +severity: warn  # Default severity
+    critical:
+      +severity: error  # Critical tests fail the run
+
+# Snapshot configurations
+snapshots:
+  dbt_shopee_tiktok:
+    +target_schema: snapshots
+    +invalidate_hard_deletes: true
+
+# On-run configurations
+on-run-start:
+  - "{{ log('Starting DBT run at ' ~ modules.datetime.datetime.now(), info=True) }}"
+
+on-run-end:
+  - "{{ log('Completed DBT run at ' ~ modules.datetime.datetime.now(), info=True) }}"
+
+# Dispatch macros from packages
+dispatch:
+  - macro_namespace: dbt_utils
+    search_order: ['dbt_utils']

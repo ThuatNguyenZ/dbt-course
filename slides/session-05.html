@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBT Course - Session 5: Documentation & Data Discovery</title>
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --light: #F7F9FC;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%);
+            --gradient-3: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--primary); }
+
+        .progress-container {
+            position: fixed;
+            top: 70px;
+            left: 0; right: 0;
+            height: 4px;
+            background: #eee;
+            z-index: 999;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-1);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .slides-container {
+            margin-top: 100px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            border-left: 5px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .slide h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary);
+        }
+
+        .objectives {
+            background: var(--gradient-3);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+        }
+
+        .objectives ul {
+            list-style: none;
+        }
+
+        .objectives li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .objectives li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .code-block {
+            background: var(--dark);
+            color: #f8f8f2;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #FF79C6; }
+        .code-block .string { color: #F1FA8C; }
+        .code-block .comment { color: #6272A4; }
+        .code-block .function { color: #8BE9FD; }
+        .code-block .variable { color: #50FA7B; }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover { background: rgba(255,255,255,0.3); }
+
+        .info-box {
+            background: linear-gradient(135deg, #FFE66D 0%, #FFB347 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 5px 20px rgba(255, 179, 71, 0.3);
+        }
+
+        .info-box.warning {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .info-box.success {
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .info-box.blue {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .docs-screenshot {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .docs-screenshot .header {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .docs-screenshot .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .docs-screenshot .dot.red { background: #FF6B6B; }
+        .docs-screenshot .dot.yellow { background: #FFE66D; }
+        .docs-screenshot .dot.green { background: #4ECDC4; }
+
+        .docs-content {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border-top: 5px solid;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .feature-card.blue { border-color: #667eea; }
+        .feature-card.green { border-color: #4ECDC4; }
+        .feature-card.red { border-color: #FF6B6B; }
+        .feature-card.yellow { border-color: #FFE66D; }
+
+        .feature-card h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .feature-card .content {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .feature-card.expanded .content {
+            display: block;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table th {
+            background: var(--gradient-1);
+            color: white;
+            font-weight: bold;
+        }
+
+        .comparison-table tr:hover {
+            background: var(--light);
+        }
+
+        .check { color: #4ECDC4; font-size: 1.3rem; }
+        .cross { color: #FF6B6B; font-size: 1.3rem; }
+
+        .quiz-container {
+            background: var(--gradient-1);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .quiz-question {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .quiz-option {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .quiz-option.correct {
+            background: #4ECDC4;
+            border-color: #4ECDC4;
+        }
+
+        .quiz-option.incorrect {
+            background: #FF6B6B;
+            border-color: #FF6B6B;
+        }
+
+        .quiz-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .slide-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.secondary {
+            background: white;
+            color: var(--dark);
+            border: 2px solid var(--dark);
+        }
+
+        .step-list {
+            counter-reset: step;
+            list-style: none;
+        }
+
+        .step-list li {
+            position: relative;
+            padding-left: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-list li::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--gradient-1);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .nav { flex-direction: column; gap: 1rem; }
+            .nav-links { flex-wrap: wrap; justify-content: center; }
+            .slides-container { margin-top: 140px; padding: 1rem; }
+            .slide { padding: 1.5rem; }
+            .slide h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-logo">🚀 DBT MasterClass</div>
+        <ul class="nav-links">
+            <li><a onclick="showSlide(0)">Giới thiệu</a></li>
+            <li><a onclick="showSlide(1)">Auto Docs</a></li>
+            <li><a onclick="showSlide(2)">YAML Descriptions</a></li>
+            <li><a onclick="showSlide(3)">Hosting</a></li>
+            <li><a onclick="showSlide(4)">Exercise</a></li>
+        </ul>
+    </nav>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="slides-container">
+
+        <!-- Slide 0: Introduction -->
+        <div class="slide active" id="slide0">
+            <h1>📚 Buổi 5: Documentation & Data Discovery</h1>
+
+            <div class="objectives">
+                <h2>📋 Mục tiêu buổi học</h2>
+                <ul>
+                    <li>Hiểu về auto-generated documentation trong DBT</li>
+                    <li>Viết descriptions cho models, columns, sources</li>
+                    <li>Sử dụng dbt docs generate và dbt docs serve</li>
+                    <li>Host documentation trên S3 hoặc web server</li>
+                    <li>Best practices cho data documentation</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>⏱️ Timeline (2 tiếng)</h3>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>20 phút: Why documentation matters</li>
+                    <li>30 phút: Auto-generated documentation demo</li>
+                    <li>40 phút: Writing YAML descriptions</li>
+                    <li>20 phút: Hosting docs on S3</li>
+                    <li>10 phút: Q&A + Assignment</li>
+                </ul>
+            </div>
+
+            <h2 style="margin-top: 2rem;">💡 Tại sao Documentation quan trọng?</h2>
+            <div class="feature-grid">
+                <div class="feature-card blue">
+                    <h4>🔍 Data Discovery</h4>
+                    <p>Giúp analysts tìm và hiểu data nhanh chóng</p>
+                </div>
+                <div class="feature-card green">
+                    <h4>📖 Self-Service</h4>
+                    <p>Giảm dependency vào engineering team</p>
+                </div>
+                <div class="feature-card red">
+                    <h4>✅ Data Quality</h4>
+                    <p>Document expectations và tests</p>
+                </div>
+                <div class="feature-card yellow">
+                    <h4>👥 Knowledge Sharing</h4>
+                    <p>Avoid tribal knowledge</p>
+                </div>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn" disabled>← Trước</button>
+                <button class="nav-btn" onclick="showSlide(1)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 1: Auto-Generated Documentation -->
+        <div class="slide" id="slide1">
+            <h1>🤖 Auto-Generated Documentation</h1>
+
+            <h2>DBT tự động generate documentation</h2>
+            <div class="info-box success">
+                <h3>✓ Không cần viết tay!</h3>
+                <p style="margin-top: 0.5rem;">DBT tự động thu thập thông tin từ project của bạn và tạo documentation website.</p>
+            </div>
+
+            <h2 style="margin-top: 2rem;">Commands cơ bản</h2>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># Generate documentation</span>
+dbt docs generate
+
+<span class="comment"># Serve locally (default port 8080)</span>
+dbt docs serve
+
+<span class="comment"># Serve trên port custom</span>
+dbt docs serve --port 3000
+
+<span class="comment"># Generate cho production target</span>
+dbt docs generate --target prod</code></pre>
+            </div>
+
+            <h2 style="margin-top: 2rem;">DBT thu thập những gì?</h2>
+            <div class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Thông tin</th>
+                        <th>Tự động</th>
+                        <th>Manual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Model names & paths</td>
+                        <td><span class="check">✓</span></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Column names & types</td>
+                        <td><span class="check">✓</span></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Model descriptions</td>
+                        <td></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Column descriptions</td>
+                        <td></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Tests & relationships</td>
+                        <td><span class="check">✓</span></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Source metadata</td>
+                        <td><span class="check">✓</span></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </div>
+
+            <div class="docs-screenshot">
+                <div class="header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="docs-content">
+$ dbt docs generate
+15:30:00  Running with dbt=1.6.0
+15:30:01  Found 12 models, 20 tests, 4 sources
+15:30:02  Building catalog
+15:30:05  Catalog written to target/catalog.json
+15:30:05  Documentation generated in 4.2s
+
+$ dbt docs serve
+15:31:00  Serving docs at http://localhost:8080
+15:31:00  Press Ctrl+C to exit
+                </div>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(0)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(2)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 2: YAML Descriptions -->
+        <div class="slide" id="slide2">
+            <h1>📝 Writing YAML Descriptions</h1>
+
+            <h2>Schema.yml Structure</h2>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code><span class="comment"># models/staging/schema.yml</span>
+version: 2
+
+models:
+  - name: stg_shopee__orders
+    description: |
+      **Staging model for Shopee orders.**
+
+      This model cleans and standardizes raw order data from Shopee API.
+      It includes order identifiers, timestamps, amounts, and status.
+
+      **Source:** Shopee Open Platform API
+      **Refresh:** Daily at 2:00 AM UTC
+      **Grain:** One row per order
+
+    columns:
+      - name: order_id
+        description: "Unique identifier for each order"
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "ID of the customer who placed the order"
+        tests:
+          - not_null
+
+      - name: order_at
+        description: |
+          Timestamp when the order was placed.
+
+          Converted from UTC to ICT timezone (UTC+7).
+
+      - name: gross_amount
+        description: |
+          Total order amount before discounts and shipping.
+
+          **Formula:** `total_amount` from Shopee API
+          **Currency:** VND
+
+      - name: status
+        description: |
+          Current order status.
+
+          Possible values:
+          - `PENDING` - Order placed but not paid
+          - `PAID` - Payment confirmed
+          - `SHIPPED` - Package with carrier
+          - `DELIVERED` - Customer received order
+          - `CANCELLED` - Order cancelled</code></pre>
+            </div>
+
+            <h2 style="margin-top: 2rem;">Documentation Best Practices</h2>
+            <div class="feature-grid">
+                <div class="feature-card blue">
+                    <h4>📋 Be Specific</h4>
+                    <div class="content">
+                        <p><strong>Bad:</strong> "Order amount"</p>
+                        <p><strong>Good:</strong> "Total order amount in VND before discounts and shipping fees"</p>
+                    </div>
+                </div>
+                <div class="feature-card green">
+                    <h4>📐 Include Grain</h4>
+                    <div class="content">
+                        <p><strong>Example:</strong> "One row per order per day"</p>
+                        <p>Helps users understand aggregation level</p>
+                    </div>
+                </div>
+                <div class="feature-card red">
+                    <h4>📖 Use Markdown</h4>
+                    <div class="content">
+                        <p>DBT supports markdown in descriptions</p>
+                        <p>Use `**bold**`, `*italics*`, code blocks</p>
+                    </div>
+                </div>
+                <div class="feature-card yellow">
+                    <h4>🔗 Add Context</h4>
+                    <div class="content">
+                        <p>Include source system, refresh schedule, business logic</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box warning">
+                <h3>⚠️ Common Mistakes</h3>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Empty or generic descriptions ("This is a table")</li>
+                    <li>Not documenting business logic</li>
+                    <li>Forgetting to update docs when models change</li>
+                    <li>Only documenting columns, not models</li>
+                </ul>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(1)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(3)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 3: Hosting Documentation -->
+        <div class="slide" id="slide3">
+            <h1>🌐 Hosting Documentation</h1>
+
+            <h2>Options để host DBT docs</h2>
+            <div class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Cost</th>
+                        <th>Setup Complexity</th>
+                        <th>Best For</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>dbt docs serve</strong></td>
+                        <td>Free</td>
+                        <td><span class="check">✓</span> Easy</td>
+                        <td>Local development</td>
+                    </tr>
+                    <tr>
+                        <td><strong>S3 + CloudFront</strong></td>
+                        <td>~$1-5/month</td>
+                        <td><span class="check">✓</span> Medium</td>
+                        <td>Production, team access</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GitHub Pages</strong></td>
+                        <td>Free</td>
+                        <td><span class="check">✓</span> Easy</td>
+                        <td>Open source projects</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DBT Cloud</strong></td>
+                        <td>$50+/month</td>
+                        <td><span class="check">✓</span> Easy</td>
+                        <td>Teams using DBT Cloud</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 style="margin-top: 2rem;">Deploy to S3 + CloudFront</h2>
+            <ol class="step-list">
+                <li>
+                    <strong>Generate documentation</strong>
+                    <div class="code-block" style="margin-top: 0.5rem;">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code>dbt docs generate --target prod</code></pre>
+                    </div>
+                </li>
+                <li>
+                    <strong>Create S3 bucket</strong>
+                    <div class="code-block" style="margin-top: 0.5rem;">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code>aws s3 mb s3://your-company-dbt-docs
+aws s3 website s3://your-company-dbt-docs/ \
+    --index-document index.html \
+    --error-document index.html</code></pre>
+                    </div>
+                </li>
+                <li>
+                    <strong>Upload docs to S3</strong>
+                    <div class="code-block" style="margin-top: 0.5rem;">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code>aws s3 sync target/ s3://your-company-dbt-docs/ \
+    --exclude "*" \
+    --include "catalog.json" \
+    --include "manifest.json" \
+    --include "index.html"</code></pre>
+                    </div>
+                </li>
+                <li>
+                    <strong>Setup CloudFront (optional but recommended)</strong>
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        Use CloudFront distribution for HTTPS and caching
+                    </div>
+                </li>
+            </ol>
+
+            <div class="info-box blue" style="margin-top: 1.5rem;">
+                <h3>🚀 Automate with GitHub Actions</h3>
+                <div class="code-block" style="margin-top: 0.5rem; background: rgba(255,255,255,0.1);">
+<pre><code><span class="comment"># .github/workflows/docs.yml</span>
+name: Deploy DBT Docs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: dbt docs generate
+      - run: aws s3 sync target/ s3://your-bucket/</code></pre>
+                </div>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(2)">← Trước</button>
+                <button class="nav-btn" onclick="showSlide(4)">Tiếp theo →</button>
+            </div>
+        </div>
+
+        <!-- Slide 4: Exercise -->
+        <div class="slide" id="slide4">
+            <h1>📝 Hands-on Exercise</h1>
+
+            <div class="objectives">
+                <h2>Bài tập thực hành</h2>
+                <p>Document toàn bộ DBT project</p>
+            </div>
+
+            <div class="info-box">
+                <h3>📋 Requirements</h3>
+                <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Write descriptions cho TẤT CẢ models trong staging/ folder</li>
+                    <li>Write descriptions cho TẤT CẢ columns với:
+                        <ul>
+                            <li>Business definition</li>
+                            <li>Data type</li>
+                            <li>Any transformations applied</li>
+                        </ul>
+                    </li>
+                    <li>Document sources với:
+                        <ul>
+                            <li>Source system description</li>
+                            <li>Load frequency</li>
+                            <li>Freshness expectations</li>
+                        </ul>
+                    </li>
+                    <li>Generate docs và review trong browser</li>
+                    <li>Deploy docs lên S3 (bonus)</li>
+                </ol>
+            </div>
+
+            <h2 style="margin-top: 2rem;">Documentation Checklist</h2>
+            <div class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Required</th>
+                        <th>Optional</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Model description</td>
+                        <td><span class="check">✓</span> Purpose, grain, source</td>
+                        <td>Refresh schedule, owner</td>
+                    </tr>
+                    <tr>
+                        <td>Column description</td>
+                        <td><span class="check">✓</span> Business definition</td>
+                        <td>Examples, edge cases</td>
+                    </tr>
+                    <tr>
+                        <td>Source description</td>
+                        <td><span class="check">✓</span> Source system</td>
+                        <td>Freshness, load process</td>
+                    </tr>
+                    <tr>
+                        <td>Test descriptions</td>
+                        <td></td>
+                        <td>Why this test matters</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="quiz-container" style="background: var(--gradient-3);">
+                <div class="quiz-question">
+                    <strong>Check your understanding:</strong> Khi nào nên re-generate documentation?
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this, false)">
+                        A. Chỉ khi có models mới
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, true)">
+                        B. Sau mỗi lần thay đổi models, columns, hoặc descriptions
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, false)">
+                        C. Mỗi tuần một lần
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, false)">
+                        D. Chỉ khi docs bị lỗi
+                    </div>
+                </div>
+                <div class="quiz-feedback" id="feedback"></div>
+            </div>
+
+            <div class="info-box warning" style="margin-top: 1.5rem;">
+                <h3>📅 Deadline</h3>
+                <p>Hoàn thành exercise trước buổi 6. Submit screenshots của documentation website.</p>
+            </div>
+
+            <div class="slide-nav">
+                <button class="nav-btn secondary" onclick="showSlide(3)">← Trước</button>
+                <button class="nav-btn" disabled>Hoàn thành ✓</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 5;
+
+        function showSlide(index) {
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+
+            const slide = document.getElementById('slide' + index);
+            if (slide) {
+                slide.classList.add('active');
+                slide.classList.add('animate-in');
+            }
+
+            currentSlide = index;
+            const progress = ((index + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleCard(element) {
+            element.classList.toggle('expanded');
+        }
+
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code);
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+        }
+
+        function selectOption(element, isCorrect) {
+            element.parentElement.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+            });
+
+            if (isCorrect) {
+                element.classList.add('correct');
+                document.getElementById('feedback').innerHTML = '<strong>🎉 Đúng!</strong> Documentation nên được re-generate sau MỌI thay đổi để đảm bảo docs luôn accurate và sync với code.';
+            } else {
+                element.classList.add('incorrect');
+                document.getElementById('feedback').innerHTML = '<strong>😅 Chưa chính xác.</strong> Docs nên được update thường xuyên để phản ánh đúng state của project.';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) showSlide(currentSlide + 1);
+            else if (e.key === 'ArrowLeft' && currentSlide > 0) showSlide(currentSlide - 1);
+        });
+
+        showSlide(0);
+    </script>
+</body>
+</html>
